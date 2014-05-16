@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * Youtube Playlist API by Eric Noguchi
+ * Version 1.2 
+ * Code is available at http://www.ericsicons.com/yt_playlistapi
+ */
+ 
 class YoutubePlayList {
 
     private $playList = array();
@@ -13,7 +19,6 @@ class YoutubePlayList {
         $playlistFile = $fileDir . $this->getID() . "_playlist.txt";
 
         if ($mainCall && file_exists($videoFile) && file_exists($playlistFile) && floor((time() - strtotime(date("F d Y H:i:s", filemtime($videoFile)))) / 3600) < $cacheAgeLimit) {
-            //echo "from cache";
             $this->videoList = unserialize($this->readFile(($videoFile)));
             $this->playList = unserialize($this->readFile(($playlistFile)));
         } else {
@@ -65,12 +70,14 @@ class YoutubePlayList {
                     }
                 }
                 // creating cache directory and files
-                $dirname = dirname($videoFile);
-                if (!is_dir($dirname)) {
-                    mkdir($dirname, 0755, true) or die("can not create youtube playlist cache directory");
+                if ($cacheAgeLimit > 0) {
+                    $dirname = dirname($videoFile);
+                    if (!is_dir($dirname)) {
+                        mkdir($dirname, 0755, true) or die("can not create youtube playlist cache directory");
+                    }
+                    $this->writeFile($videoFile, serialize($this->videoList));
+                    $this->writeFile($playlistFile, serialize($this->playList));
                 }
-                $this->writeFile($videoFile, serialize($this->videoList));
-                $this->writeFile($playlistFile, serialize($this->playList));
             }
         }
     }
@@ -178,7 +185,11 @@ class YoutubePlayList {
     }
 
     private function js($str) {
-        return trim(preg_replace('/\r\n|\r|\n/', '<br />', $this->encodeQuotes($str)));
+        return $this->newLineToBR($this->encodeQuotes($str));
+    }
+
+    private function newLineToBR($str) {
+        return preg_replace('/\r\n|\r|\n/', '<br />', $str);
     }
 
     private function encodeQuotes($str) {
@@ -189,12 +200,12 @@ class YoutubePlayList {
     public function display($show) {
         print '<div id="yt_plContainer" class="yt_plContainer">';
         $show['playlistTitle'] and
-                print '<div class="yt_title">&nbsp;' . htmlspecialchars($this->getTitle()) . '<input type="button" value="Hide" onclick="showHide(\'description\',this)" /></div>';
-        $show['playlistDescription'] and print '<div id="description" class="yt_description">' . htmlspecialchars($this->getDescription()) . '</div>';
+                print '<div class="yt_title">&nbsp;' . $this->getTitle() . '<input type="button" value="Hide" onclick="showHide(\'description\',this)" /></div>';
+        $show['playlistDescription'] and print '<div id="description" class="yt_description">' . $this->newLineToBR($this->getDescription()) . '</div>';
         print '<div id="player"><iframe class="yt_player" src="//www.youtube.com/embed/' . $this->videoList[0]->getID() . '?rel=0"  allowfullscreen></iframe></div>';
         if ($show['videoDescription']) {
             print '<div class="yt_title">&nbsp;Video Information<input type="button" value="Hide" onclick="showHide(\'videoInfo\',this)" /></div>';
-            print '<div id="videoInfo" class="yt_description">' . $this->videoList[0]->getDescription() . '</div>';
+            print '<div id="videoInfo" class="yt_description">' . $this->newLineToBR($this->videoList[0]->getDescription()) . '</div>';
         }
         print '<div class="yt_title">&nbsp;Playlist';
         $show['playlistVideoCount'] and print ' (' . $this->getNumOfVideos() . ')';
@@ -216,7 +227,7 @@ class YoutubePlayList {
             print '<tr class="plTracks" onclick="loadVideo(\'' . $video->getID() . "'" . ($show['videoDescription'] ? ",'" . htmlspecialchars($this->js($video->getDescription())) . "'" : "") . ')">';
             print '<th>' . ($i + 1) . '</th>';
             $show['videoImage'] and print '<td class="yt_img"><img alt="" class="yt_img" src=' . $video->getThumbnail() . ' /></td>';
-            $show['videoTitle'] and print '<td class="videoTitle">' . htmlspecialchars($video->getTitle()) . '</td>';
+            $show['videoTitle'] and print '<td class="videoTitle">' . $video->getTitle() . '</td>';
             $show['videoAuthor'] and print '<td>' . $video->getAuthor() . '</td>';
             $show['videoDatePublished'] and print '<td>' . $video->getDatePublished() . '</td>';
             $show['videoViews'] and print '<td>' . $video->getViews() . '</td>';
@@ -340,15 +351,6 @@ class YouTubeVideo {
         $second = intVal($seconds);
         $mod = $seconds % 60;
         return floor($seconds / 60) . ":" . ($mod < 10 ? "0" . $mod : $mod);
-    }
-
-    private function js($str) {
-        return trim(preg_replace('/\r\n|\r|\n/', '<br />', $this->encodeQuotes($str)));
-    }
-
-    private function encodeQuotes($str) {
-        $removeSingle = str_replace("'", "&#39;", $str);
-        return str_replace('"', "&#34;", $removeSingle);
     }
 
 }
