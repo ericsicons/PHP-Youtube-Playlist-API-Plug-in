@@ -6,7 +6,7 @@
  */
 
 require 'ytpl_php.php';
-$playlist = new YoutubePlayList($playlistID = "6B08BAA57B5C7810", $cacheAge = 1);
+$playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 0);
 
 /*
  * @playListUR

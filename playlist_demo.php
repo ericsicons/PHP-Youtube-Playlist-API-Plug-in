@@ -16,8 +16,8 @@
         // you must include ytpl_php.php in every page that will contain a playlist
         require 'ytpl_php.php';
 
-        /* Example of some playlist ids 6B08BAA57B5C7810, nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0
-         * 
+        /* Example of some playlist ids 6B08BAA57B5C7810, nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u
+         * nqdTIS_B64Lvabv-9DefptjfYjwLXU0D
          * @$playlistID
          * The ID of playlist you would like to load, this ID is appended to the playlist URL 
          * on youtube. Note: do not include the characters PL as part of the playlist ID
@@ -31,7 +31,7 @@
          * setting $cacheAge to 0 will always load from youtube directly which will degrade loading performance.
          * If unset or left null, the default is cacheAge is 7 days
          */
-        $playlist = new YoutubePlayList($playlistID = "6B08BAA57B5C7810", $cacheAge = 1);
+        $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 0);
 
         /* Call the display method in the place where you want the playlist to appear.
          * Set true or false to show and hide specific playlist data.
@@ -51,14 +51,6 @@
             'videoRaters' => true,
         ));
         ?>
-        <!-- sample of how to use getJSON() method
-        <script>
-            var playlist = JSON.parse('<?php // echo $playlist->getJSON();                   ?>');
-            for (var video in playlist.videos) {
-                document.write(video + ": " + playlist.videos[video].title + "<br>");
-            }
-
-        </script>
-        -->
+      
     </body>
 </html> 

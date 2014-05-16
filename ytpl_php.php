@@ -116,8 +116,8 @@ class YoutubePlayList {
     /* utility functions */
 
     public function getJSON() {
-        $JSONString = '{"id":"' . $this->getID() . '","title":"' . $this->getTitle() .
-                '","description":"' . $this->getDescription() . '","numVideos":"' . $this->getNumOfVideos() . '","videos":{';
+        $JSONString = '{"id":"' . $this->getID() . '","title":"' . $this->js($this->getTitle()) .
+                '","description":"' . $this->js($this->getDescription()) . '","numVideos":"' . $this->getNumOfVideos() . '","videos":{';
         foreach ($this->videoList as $k => $v) {
             $c = ",";
             reset($this->videoList);
@@ -125,12 +125,13 @@ class YoutubePlayList {
             if ($k === key($this->videoList)) {
                 $c = "";
             }
-            $JSONString.= '"' . $v->getID() . '":{'
-                    . '"title":"' . $v->getTitle() . '",'
+            $JSONString.= '"' . $k . '":{'
+                    . '"id":"' . $v->getID() . '",'
+                    . '"title":"' . $this->js($v->getTitle()) . '",'
                     . '"duration":"' . $v->getDuration() . '",'
                     . '"thumbnail":"' . $v->getThumbnail() . '",'
                     . '"datePublished":"' . $v->getDatePublished() . '",'
-                    . '"description":"' . $v->getDescription() . '",'
+                    . '"description":"' . $this->js($v->getDescription()) . '",'
                     . '"views":"' . $v->getViews() . '",'
                     . '"favorites":"' . $v->getFavorites() . '",'
                     . '"numRated":"' . $v->getNumRaters() . '",'
@@ -146,11 +147,11 @@ class YoutubePlayList {
     public function getRSS($config) {
         $config['showNumVideos'] = isset($config['showNumVideos']) ? intval($config['showNumVideos']) : 10;
 
-        $RSSString = '<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title>' . $this->getTitle() .
-                '</title><link>' . (isset($config['playListURL']) ? $config['playListURL'] : $this->getURL()) . '</link><description>' . $this->getDescription() . '</description>';
+        $RSSString = '<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title><![CDATA[' . $this->getTitle() .
+                ']]></title><link>' . (isset($config['playListURL']) ? $config['playListURL'] : $this->getURL()) . '</link><description><![CDATA[' . $this->getDescription() . ']]></description>';
 
         foreach ($this->videoList as $k => $v) {
-            $RSSString.= '<item><title>' . $v->getTitle() . '</title>'
+            $RSSString.= '<item><title><![CDATA[' . $v->getTitle() . ']]></title>'
                     . '<description><![CDATA[<img src="' . $v->getThumbnail() . '" /><br />' . $v->getDescription() . ']]></description>'
                     . '<link>' . (isset($config['playListURL']) ? $config['playListURL'] : $v->getUrl()) . '</link>'
                     . '<pubDate>' . $v->getDatePublished() . '</pubDate></item>';
@@ -177,14 +178,19 @@ class YoutubePlayList {
     }
 
     private function js($str) {
-        return trim(preg_replace('/\r\n|\r|\n/', '<br />', htmlspecialchars($str)));
+        return trim(preg_replace('/\r\n|\r|\n/', '<br />', $this->encodeQuotes($str)));
+    }
+
+    private function encodeQuotes($str) {
+        $removeSingle = str_replace("'", "&#39;", $str);
+        return str_replace('"', "&#34;", $removeSingle);
     }
 
     public function display($show) {
         print '<div id="yt_plContainer" class="yt_plContainer">';
         $show['playlistTitle'] and
-                print '<div class="yt_title">&nbsp;' . $this->js($this->getTitle()) . '<input type="button" value="Hide" onclick="showHide(\'description\',this)" /></div>';
-        $show['playlistDescription'] and print '<div id="description" class="yt_description">' . $this->js($this->getDescription()) . '</div>';
+                print '<div class="yt_title">&nbsp;' . htmlspecialchars($this->getTitle()) . '<input type="button" value="Hide" onclick="showHide(\'description\',this)" /></div>';
+        $show['playlistDescription'] and print '<div id="description" class="yt_description">' . htmlspecialchars($this->getDescription()) . '</div>';
         print '<div id="player"><iframe class="yt_player" src="//www.youtube.com/embed/' . $this->videoList[0]->getID() . '?rel=0"  allowfullscreen></iframe></div>';
         if ($show['videoDescription']) {
             print '<div class="yt_title">&nbsp;Video Information<input type="button" value="Hide" onclick="showHide(\'videoInfo\',this)" /></div>';
@@ -207,10 +213,10 @@ class YoutubePlayList {
         print '</tr>';
 
         foreach ($this->videoList as $i => $video) {
-            print '<tr class="plTracks" onclick="loadVideo(\'' . $video->getID() . "'" . ($show['videoDescription'] ? ",'" . $video->getDescription() . "'" : "") . ')">';
+            print '<tr class="plTracks" onclick="loadVideo(\'' . $video->getID() . "'" . ($show['videoDescription'] ? ",'" . htmlspecialchars($this->js($video->getDescription())) . "'" : "") . ')">';
             print '<th>' . ($i + 1) . '</th>';
             $show['videoImage'] and print '<td class="yt_img"><img alt="" class="yt_img" src=' . $video->getThumbnail() . ' /></td>';
-            $show['videoTitle'] and print '<td class="videoTitle">' . $video->getTitle() . '</td>';
+            $show['videoTitle'] and print '<td class="videoTitle">' . htmlspecialchars($video->getTitle()) . '</td>';
             $show['videoAuthor'] and print '<td>' . $video->getAuthor() . '</td>';
             $show['videoDatePublished'] and print '<td>' . $video->getDatePublished() . '</td>';
             $show['videoViews'] and print '<td>' . $video->getViews() . '</td>';
@@ -246,7 +252,7 @@ class YouTubeVideo {
     }
 
     public function setTitle($title) {
-        $this->title = (string) $this->js($title);
+        $this->title = (string) $title;
     }
 
     public function setDuration($duration) {
@@ -267,7 +273,7 @@ class YouTubeVideo {
     }
 
     public function setDescription($description) {
-        $this->description = (string) $this->js($description);
+        $this->description = (string) $description;
     }
 
     public function setFavorites($favorites) {
@@ -337,7 +343,12 @@ class YouTubeVideo {
     }
 
     private function js($str) {
-        return trim(preg_replace('/\r\n|\r|\n/', '<br />', htmlspecialchars($str)));
+        return trim(preg_replace('/\r\n|\r|\n/', '<br />', $this->encodeQuotes($str)));
+    }
+
+    private function encodeQuotes($str) {
+        $removeSingle = str_replace("'", "&#39;", $str);
+        return str_replace('"', "&#34;", $removeSingle);
     }
 
 }
