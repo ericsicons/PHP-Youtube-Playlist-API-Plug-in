@@ -1,6 +1,6 @@
 <?php
 require 'ytpl_php.php';
-$playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 0);
+$playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
 ?>
 
 <!DOCTYPE html>
