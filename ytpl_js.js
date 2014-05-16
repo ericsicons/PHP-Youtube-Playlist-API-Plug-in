@@ -1,3 +1,6 @@
+/*
+ * PHP Youtube Playlist API Plugin JavaScript File, version 1
+*/
 function loadVideo(id, videoInfo) {
     document.getElementById("player").innerHTML = '<iframe class="yt_player" src="//www.youtube.com/embed/' + id + '?rel=0&autoplay=1" frameborder="0" allowfullscreen></iframe>';
     if (typeof videoInfo !== 'undefined')
