@@ -38,5 +38,4 @@ Specifications and Features :
 	<li>Video Raters: the sum total of likes and dislikes for the particular video</li>
 </ul>
 
-
 Visit <a target="_blank" href="http://www.ericsicons.com/yt_playlistapi">http://www.ericsicons.com/yt_playlistapi</a> for a Demo and Instructions
