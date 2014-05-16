@@ -17,7 +17,6 @@
         require 'ytpl_php.php';
 
         /* Example of some playlist ids 6B08BAA57B5C7810, nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u
-         * nqdTIS_B64Lvabv-9DefptjfYjwLXU0D
          * @$playlistID
          * The ID of playlist you would like to load, this ID is appended to the playlist URL 
          * on youtube. Note: do not include the characters PL as part of the playlist ID
@@ -28,10 +27,11 @@
          * $cacheAge is the max age of the cached data in hours before the program revisits youtube to update
          * the cache. So for example $cacheAge = 1 means the program will visit youtube again if the cached
          * data is more than an hour old.
-         * setting $cacheAge to 0 will always load from youtube directly which will degrade loading performance.
-         * If unset or left null, the default is cacheAge is 7 days
+         * setting $cacheAge to 0 will disable caching and always load the playlist data from youtube directly 
+         * which will degrade loading performance.
+         * If unset or left null, the default cacheAge is 7 days
          */
-        $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 0);
+        $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
 
         /* Call the display method in the place where you want the playlist to appear.
          * Set true or false to show and hide specific playlist data.
@@ -51,6 +51,6 @@
             'videoRaters' => true,
         ));
         ?>
-      
+
     </body>
 </html> 
