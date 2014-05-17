@@ -2,10 +2,10 @@
 
 /*
  * Youtube Playlist API by Eric Noguchi
- * Version 1.2 
+ * Version 1.3 
  * Code is available at http://www.ericsicons.com/yt_playlistapi
  */
- 
+
 class YoutubePlayList {
 
     private $playList = array();
@@ -22,8 +22,11 @@ class YoutubePlayList {
             $this->videoList = unserialize($this->readFile(($videoFile)));
             $this->playList = unserialize($this->readFile(($playlistFile)));
         } else {
-            $xml = simplexml_load_string(file_get_contents('http://gdata.youtube.com/feeds/api/playlists/' . $playlistID . '?max-results=50&start-index=' . $startIndex))
-                    or die(".: Error Opening Playlist " . $this->getID() . ", Please check if the playlist ID is valid :.");
+            $xml = simplexml_load_string(file_get_contents('http://gdata.youtube.com/feeds/api/playlists/' . $playlistID . '?max-results=50&start-index=' . $startIndex));
+            if (!$xml) {
+                throw new PlaylistNotFound(".: Error Opening Playlist " . $this->getID() . ", Please check if the playlist ID is valid :.");
+            }
+
             $t = $xml->children('openSearch', true);
 
             $this->playList['title'] = (string) $xml->title;
@@ -351,6 +354,14 @@ class YouTubeVideo {
         $second = intVal($seconds);
         $mod = $seconds % 60;
         return floor($seconds / 60) . ":" . ($mod < 10 ? "0" . $mod : $mod);
+    }
+
+}
+
+class PlaylistNotFound extends Exception {
+
+    public function __construct($message) {
+        parent::__construct($message, 400, null);
     }
 
 }
