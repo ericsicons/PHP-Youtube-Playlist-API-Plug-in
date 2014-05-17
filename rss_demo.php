@@ -5,7 +5,8 @@
  */
 
 require 'ytpl_php.php';
-header('Content-Type: application/atom+xml; charset=UTF-8');
+header('Content-Type: application/xml; charset=UTF-8');
+
 
 $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
 
