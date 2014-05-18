@@ -13,6 +13,7 @@
     <body>
         <h3>PHP Youtube Playlist API Plugin Demo</h3>
         <?php
+        error_reporting(0);
         // you must include ytpl_php.php in every page that will contain a playlist
         require 'ytpl_php.php';
 
@@ -31,25 +32,29 @@
          * which will degrade loading performance.
          * If unset or left null, the default cacheAge is 7 days
          */
-        $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
+        try {
+            $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
 
-        /* Call the display method in the place where you want the playlist to appear.
-         * Set true or false to show and hide specific playlist data.
-         */
-        $playlist->display(array(
-            'playlistTitle' => true,
-            'playlistDescription' => true,
-            'playlistVideoCount' => true,
-            'videoTitle' => true,
-            'videoDescription' => true,
-            'videoImage' => true,
-            'videoViews' => true,
-            'videoAuthor' => false,
-            'videoDuration' => true,
-            'videoDatePublished' => false,
-            'videoFavoritesCount' => false,
-            'videoRaters' => true,
-        ));
+            /* Call the display method in the place where you want the playlist to appear.
+             * Set true or false to show and hide specific playlist data.
+             */
+            $playlist->display(array(
+                'playlistTitle' => true,
+                'playlistDescription' => true,
+                'playlistVideoCount' => true,
+                'videoTitle' => true,
+                'videoDescription' => true,
+                'videoImage' => true,
+                'videoViews' => true,
+                'videoAuthor' => false,
+                'videoDuration' => true,
+                'videoDatePublished' => false,
+                'videoFavoritesCount' => false,
+                'videoRaters' => true,
+            ));
+        } catch (PlaylistNotFound $e) {
+            echo $e->getMessage();
+        }
         ?>
 
     </body>
