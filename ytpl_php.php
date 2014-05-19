@@ -1,9 +1,15 @@
 <?php
 
 /**
- * Youtube Playlist API by Eric Noguchi
+ * The YoutubePlayList class is used to create object instances representing a Youtube playlist with methods 
+ * to display and return the playlist data in various formats.
+ *
+ * The constructor of the YoutubePlayList class takes a yotube Playlist ID and the Cache Age.
+ * @example <br />
+ * $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
+ * @license   free
  * @version   1.3
- * @license  http://www.ericsicons.com/yt_playlistapi
+ * @since     2014-Apr-23
  * @author    Eric Noguchi <eric@ericsicons.com>
  */
 class YoutubePlayList {
@@ -11,15 +17,26 @@ class YoutubePlayList {
     private $playList = array();
     private $videoList = array();
 
-    public function __construct($playlistID, $cacheAgeLimit = 168, $startIndex = 1, $mainCall = true) {
+    /**
+     * Creates a YoutubePlayList object from the specified playlistID.
+     * @param string $playlistID The ID of playlist to load.
+     * @param int $cacheAge The max age of the cached data in hours before the program revisits Youtube to update the 
+     * cache.<br />Set to 0 to disable caching and always load the playlist data from Youtube.
+     * @param int $startIndex For internal use. The Youtube video index number to start loading from.
+     * @param boolean $notRecursiveCall For internal use, used to determine if the YoutubePlayList object was 
+     * created internally.
+     *  
+     * @throws PlaylistNotFound
+     */
+    public function __construct($playlistID, $cacheAge = 168, $startIndex = 1, $notRecursiveCall = true) {
         $this->playList['id'] = "PL" . $playlistID;
 
         $fileDir = "ytpl_cache/";
         $videoFile = $fileDir . $this->getID() . "_videos.txt";
         $playlistFile = $fileDir . $this->getID() . "_playlist.txt";
 
-        if ($mainCall && file_exists($videoFile) && file_exists($playlistFile) && floor((time() -
-                        strtotime(date("F d Y H:i:s", filemtime($videoFile)))) / 3600) < $cacheAgeLimit) {
+        if ($notRecursiveCall && file_exists($videoFile) && file_exists($playlistFile) && floor((time() -
+                        strtotime(date("F d Y H:i:s", filemtime($videoFile)))) / 3600) < $cacheAge) {
             $this->videoList = unserialize($this->readFile(($videoFile)));
             $this->playList = unserialize($this->readFile(($playlistFile)));
         } else {
@@ -65,7 +82,7 @@ class YoutubePlayList {
             }
 
 
-            if ($mainCall) {
+            if ($notRecursiveCall) {
                 //  creating sub-playlists and merging them to main playlist as YT allows 50 videos max per request 
                 $numReqs = ceil($this->playList['numVideos'] / 50);
                 if ($numReqs > 1) {
@@ -76,7 +93,7 @@ class YoutubePlayList {
                     }
                 }
                 // creating cache directory and files
-                if ($cacheAgeLimit > 0) {
+                if ($cacheAge > 0) {
                     $dirname = dirname($videoFile);
                     if (!is_dir($dirname)) {
                         mkdir($dirname, 0755, true) or die("can not create youtube playlist cache directory");
@@ -89,7 +106,7 @@ class YoutubePlayList {
     }
 
     /**
-     * Returns an array of all the YoutubeVideo objects
+     * Returns an array of all the YoutubeVideo objects.
      * @return Array
      */
     public function getVideoListArray() {
@@ -97,8 +114,8 @@ class YoutubePlayList {
     }
 
     /**
-     * Returns a YoutubeVideo object given an index
-     * @param int $id The index of Youtube video in the playlist
+     * Returns a YoutubeVideo object given an index.
+     * @param int $id The index of Youtube video in the playlist.
      * @return YoutubeVideo
      */
     public function getVideoByIndex($i) {
@@ -106,8 +123,8 @@ class YoutubePlayList {
     }
 
     /**
-     * Returns a YoutubeVideo object given a video id
-     * @param string $id The id of you Youtube video
+     * Returns a YoutubeVideo object given a video id.
+     * @param string $id The id of you Youtube video.
      * @return YoutubeVideo
      */
     public function getVideoById($id) {
@@ -119,7 +136,7 @@ class YoutubePlayList {
     }
 
     /**
-     * Returns the id of the playlist
+     * Returns the id of the playlist.
      * @return string
      */
     public function getID() {
@@ -127,7 +144,7 @@ class YoutubePlayList {
     }
 
     /**
-     * Returns the title of the playlist
+     * Returns the title of the playlist.
      * @return string
      */
     public function getTitle() {
@@ -135,7 +152,7 @@ class YoutubePlayList {
     }
 
     /**
-     * Returns the description of the playlist
+     * Returns the description of the playlist.
      * @return string
      */
     public function getDescription() {
@@ -144,7 +161,7 @@ class YoutubePlayList {
 
     /**
      * Returns the total number of videos 
-     * in the playlist
+     * in the playlist.
      * @return int
      */
     public function getNumOfVideos() {
@@ -152,7 +169,7 @@ class YoutubePlayList {
     }
 
     /**
-     * Returns the Youtube URL of the playlist 
+     * Returns the Youtube URL of the playlist.
      * @return string
      */
     public function getURL() {
@@ -160,7 +177,7 @@ class YoutubePlayList {
     }
 
     /**
-     * Returns all of the playlist data in JSON format <br />
+     * Returns all of the playlist data in JSON format. <br />
      * Key structure : {id, title, description ,numVideos, videos:{ 
      * <br />videoIndex:{id, title, duration, thumbnail, datePublished, description, views, favorites, numRated, author
      * } } }
@@ -199,7 +216,7 @@ class YoutubePlayList {
     /**
      * Returns the playlist RSS feed. <br />
      * Set numOfVideos to the number of the videos to show in the RSS feed, default: the latest 10 videos.<br />
-     * Set playlistUrl to your website URL where the playlist located, default: Youtube's URL for the playlist. <br />
+     * Set playlistUrl to your website URL where the playlist is located, default: Youtube's URL for the playlist.<br />
      * @param array $config array("showNumVideos" => int numOfVideos, "playListURL" => string playlistUrl) <br />
      * @return string
      */
@@ -225,11 +242,12 @@ class YoutubePlayList {
 
         return $RSSString;
     }
+
     /**
      * Builds and displays the playlist. <br />
      * Call this method in the location you want the playlist to appear on your site.<br />
-     * See playlist_demo.php for an example of how to set the $show configuration array
-     * @param array $show  Configuration array to select which playlist data to show or hide in output. <br />
+     * @see playlist_demo.php
+     * @param array $show  Configuration array used to select which playlist data to show or hide. <br />
      */
     public function display($show) {
         print '<div id="yt_plContainer" class="yt_plContainer">';
@@ -311,6 +329,15 @@ class YoutubePlayList {
 
 }
 
+/**
+ * The YouTubeVideo class is used to create object instances representing a Youtube Video with methods 
+ * to set and get the video data, this class is for internal use.
+ *
+ * @license   free
+ * @version   1.3
+ * @since     2014-Apr-23
+ * @author    Eric Noguchi <eric@ericsicons.com>
+ */
 class YouTubeVideo {
     /* video id
      * @var string */
@@ -426,6 +453,14 @@ class YouTubeVideo {
 
 }
 
+/**
+ * Class to handle the exception thrown when the supplied playlist ID is invalid
+ *
+ * @license   free
+ * @version   1.3
+ * @since     2014-Apr-23
+ * @author    Eric Noguchi <eric@ericsicons.com>
+ */
 class PlaylistNotFound extends Exception {
 
     public function __construct($message) {
