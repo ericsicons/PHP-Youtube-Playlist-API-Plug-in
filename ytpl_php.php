@@ -188,12 +188,8 @@ class YoutubePlayList {
                 '","description":"' . $this->js($this->getDescription()) . '","numVideos":"' . $this->getNumOfVideos()
                 . '","videos":{';
         foreach ($this->videoList as $k => $v) {
-            $c = ",";
-            reset($this->videoList);
-            end($this->videoList);
-            if ($k === key($this->videoList)) {
-                $c = "";
-            }
+            $c = ($k === count($this->videoList) - 1) ? "" : ",";
+
             $JSONString.= '"' . $k . '":{'
                     . '"id":"' . $v->getID() . '",'
                     . '"title":"' . $this->js($v->getTitle()) . '",'
