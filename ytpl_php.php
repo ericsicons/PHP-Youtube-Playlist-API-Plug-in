@@ -1,11 +1,11 @@
 <?php
 
-/*
+/**
  * Youtube Playlist API by Eric Noguchi
- * Version 1.3 
- * Code is available at http://www.ericsicons.com/yt_playlistapi
+ * @version   1.3
+ * @license  http://www.ericsicons.com/yt_playlistapi
+ * @author    Eric Noguchi <eric@ericsicons.com>
  */
-
 class YoutubePlayList {
 
     private $playList = array();
@@ -18,13 +18,16 @@ class YoutubePlayList {
         $videoFile = $fileDir . $this->getID() . "_videos.txt";
         $playlistFile = $fileDir . $this->getID() . "_playlist.txt";
 
-        if ($mainCall && file_exists($videoFile) && file_exists($playlistFile) && floor((time() - strtotime(date("F d Y H:i:s", filemtime($videoFile)))) / 3600) < $cacheAgeLimit) {
+        if ($mainCall && file_exists($videoFile) && file_exists($playlistFile) && floor((time() -
+                        strtotime(date("F d Y H:i:s", filemtime($videoFile)))) / 3600) < $cacheAgeLimit) {
             $this->videoList = unserialize($this->readFile(($videoFile)));
             $this->playList = unserialize($this->readFile(($playlistFile)));
         } else {
-            $xml = simplexml_load_string(file_get_contents('http://gdata.youtube.com/feeds/api/playlists/' . $playlistID . '?max-results=50&start-index=' . $startIndex));
+            $xml = simplexml_load_string(file_get_contents('http://gdata.youtube.com/feeds/api/playlists/' . $playlistID
+                            . '?max-results=50&start-index=' . $startIndex));
             if (!$xml) {
-                throw new PlaylistNotFound(".: Error Opening Playlist " . $this->getID() . ", Please check if the playlist ID is valid :.");
+                throw new PlaylistNotFound(".: Error Opening Playlist " . $this->getID()
+                . ", Please check if the playlist ID is valid :.");
             }
 
             $t = $xml->children('openSearch', true);
@@ -64,7 +67,7 @@ class YoutubePlayList {
 
             if ($mainCall) {
                 //  creating sub-playlists and merging them to main playlist as YT allows 50 videos max per request 
-                $numReqs = ceil(intVal($this->playList['numVideos']) / 50);
+                $numReqs = ceil($this->playList['numVideos'] / 50);
                 if ($numReqs > 1) {
                     $temp = array();
                     for ($x = 1; $x < $numReqs; $x++) {
@@ -85,16 +88,28 @@ class YoutubePlayList {
         }
     }
 
-    /* playlist get functions */
-
+    /**
+     * Returns an array of all the YoutubeVideo objects
+     * @return Array
+     */
     public function getVideoListArray() {
         return $this->videoList;
     }
 
+    /**
+     * Returns a YoutubeVideo object given an index
+     * @param int $id The index of Youtube video in the playlist
+     * @return YoutubeVideo
+     */
     public function getVideoByIndex($i) {
         return $this->videoList[$i];
     }
 
+    /**
+     * Returns a YoutubeVideo object given a video id
+     * @param string $id The id of you Youtube video
+     * @return YoutubeVideo
+     */
     public function getVideoById($id) {
         foreach ($this->videoList as $video) {
             if ($video->getId() == $id) {
@@ -103,31 +118,58 @@ class YoutubePlayList {
         }
     }
 
+    /**
+     * Returns the id of the playlist
+     * @return string
+     */
     public function getID() {
         return $this->playList['id'];
     }
 
+    /**
+     * Returns the title of the playlist
+     * @return string
+     */
     public function getTitle() {
         return $this->playList['title'];
     }
 
+    /**
+     * Returns the description of the playlist
+     * @return string
+     */
     public function getDescription() {
         return $this->playList['description'];
     }
 
+    /**
+     * Returns the total number of videos 
+     * in the playlist
+     * @return int
+     */
     public function getNumOfVideos() {
-        return $this->playList['numVideos'];
+        return intval($this->playList['numVideos']);
     }
 
+    /**
+     * Returns the Youtube URL of the playlist 
+     * @return string
+     */
     public function getURL() {
         return "https://www.youtube.com/playlist?list=" . $this->getID();
     }
 
-    /* utility functions */
-
+    /**
+     * Returns all of the playlist data in JSON format <br />
+     * Key structure : {id, title, description ,numVideos, videos:{ 
+     * <br />videoIndex:{id, title, duration, thumbnail, datePublished, description, views, favorites, numRated, author
+     * } } }
+     * @return string
+     */
     public function getJSON() {
         $JSONString = '{"id":"' . $this->getID() . '","title":"' . $this->js($this->getTitle()) .
-                '","description":"' . $this->js($this->getDescription()) . '","numVideos":"' . $this->getNumOfVideos() . '","videos":{';
+                '","description":"' . $this->js($this->getDescription()) . '","numVideos":"' . $this->getNumOfVideos()
+                . '","videos":{';
         foreach ($this->videoList as $k => $v) {
             $c = ",";
             reset($this->videoList);
@@ -154,15 +196,25 @@ class YoutubePlayList {
         return $JSONString;
     }
 
+    /**
+     * Returns the playlist RSS feed. <br />
+     * Set numOfVideos to the number of the videos to show in the RSS feed, default: the latest 10 videos.<br />
+     * Set playlistUrl to your website URL where the playlist located, default: Youtube's URL for the playlist. <br />
+     * @param array $config array("showNumVideos" => int numOfVideos, "playListURL" => string playlistUrl) <br />
+     * @return string
+     */
     public function getRSS($config) {
         $config['showNumVideos'] = isset($config['showNumVideos']) ? intval($config['showNumVideos']) : 10;
 
-        $RSSString = '<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title><![CDATA[' . $this->getTitle() .
-                ']]></title><link>' . (isset($config['playListURL']) ? $config['playListURL'] : $this->getURL()) . '</link><description><![CDATA[' . $this->getDescription() . ']]></description>';
+        $RSSString = '<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title><![CDATA[' .
+                $this->getTitle() .
+                ']]></title><link>' . (isset($config['playListURL']) ? $config['playListURL'] : $this->getURL())
+                . '</link><description><![CDATA[' . $this->getDescription() . ']]></description>';
 
         foreach ($this->videoList as $k => $v) {
             $RSSString.= '<item><title><![CDATA[' . $v->getTitle() . ']]></title>'
-                    . '<description><![CDATA[<img src="' . $v->getThumbnail() . '" /><br />' . $v->getDescription() . ']]></description>'
+                    . '<description><![CDATA[<img src="' . $v->getThumbnail() . '" /><br />' . $v->getDescription() .
+                    ']]></description>'
                     . '<link>' . (isset($config['playListURL']) ? $config['playListURL'] : $v->getUrl()) . '</link>'
                     . '<pubDate>' . $v->getDatePublished() . '</pubDate></item>';
             if ($k == ($config['showNumVideos'] - 1)) {
@@ -172,6 +224,63 @@ class YoutubePlayList {
         $RSSString.= "</channel></rss>";
 
         return $RSSString;
+    }
+    /**
+     * Builds and displays the playlist. <br />
+     * Call this method in the location you want the playlist to appear on your site.<br />
+     * See playlist_demo.php for an example of how to set the $show configuration array
+     * @param array $show  Configuration array to select which playlist data to show or hide in output. <br />
+     */
+    public function display($show) {
+        print '<div id="yt_plContainer" class="yt_plContainer">';
+        $show['playlistTitle'] and
+                print '<div class="yt_title">&nbsp;' . $this->getTitle() .
+                        '<input type="button" value="Hide" onclick="showHide(\'description\',this)" /></div>';
+        $show['playlistDescription'] and print '<div id="description" class="yt_description">' .
+                        $this->newLineToBR($this->getDescription()) . '</div>';
+        print '<div id="player"><iframe class="yt_player" src="//www.youtube.com/embed/' . $this->videoList[0]->getID()
+                . '?rel=0"  allowfullscreen></iframe></div>';
+        if ($show['videoDescription']) {
+            print '<div class="yt_title">&nbsp;Video Information'
+                    . '<input type="button" value="Hide" onclick="showHide(\'videoInfo\',this)" /></div>';
+            print '<div id="videoInfo" class="yt_description">' .
+                    $this->newLineToBR($this->videoList[0]->getDescription()) . '</div>';
+        }
+        print '<div class="yt_title">&nbsp;Playlist';
+        $show['playlistVideoCount'] and print ' (' . $this->getNumOfVideos() . ')';
+        print '<input type="button" value="Hide" onclick="showHide(\'youtubePl\',this)" />'
+                . '<input type="button" value="Play All"'
+                . ' onclick="loadPlaylist(\'' . $this->getID() . '\')" /></div>';
+        print '<div class="yt_tblContainer"><table id="youtubePl" class="youtubePl"><tr class="plHeader">';
+        print '<th></th>';
+        $show['videoImage'] and print '<th></th>';
+        $show['videoTitle'] and print '<th>Title</th>';
+        $show['videoAuthor'] and print '<th>Author</th>';
+        $show['videoDatePublished'] and print '<th>Date Published</th>';
+        $show['videoViews'] and print '<th>Views</th>';
+        $show['videoFavoritesCount'] and print '<th>Favorites</th>';
+        $show['videoRaters'] and print '<th>Rated</th>';
+        $show['videoDuration'] and print '<th>Duration</th>';
+        print '</tr>';
+
+        foreach ($this->videoList as $i => $video) {
+            print '<tr class="plTracks" onclick="loadVideo(\'' . $video->getID() . "'" . ($show['videoDescription'] ?
+                            ",'" . htmlspecialchars($this->js($video->getDescription())) . "'" : "") . ')">';
+            print '<th>' . ($i + 1) . '</th>';
+            $show['videoImage'] and print '<td class="yt_img"><img alt="" class="yt_img" src=' . $video->getThumbnail()
+                            . ' /></td>';
+            $show['videoTitle'] and print '<td class="videoTitle">' . $video->getTitle() . '</td>';
+            $show['videoAuthor'] and print '<td>' . $video->getAuthor() . '</td>';
+            $show['videoDatePublished'] and print '<td>' . $video->getDatePublished() . '</td>';
+            $show['videoViews'] and print '<td>' . $video->getViews() . '</td>';
+            $show['videoFavoritesCount'] and print '<td>' . $video->getFavorites() . '</td>';
+            $show['videoRaters'] and print '<td>' . $video->getNumRaters() . '</td>';
+            $show['videoDuration'] and print '<td class="yt_duration">' . $video->getDuration() . '</td>';
+            print '</tr>';
+        }
+
+        print "</table></div>";
+        print "</div>";
     }
 
     private function writeFile($file, $str) {
@@ -200,53 +309,11 @@ class YoutubePlayList {
         return str_replace('"', "&#34;", $removeSingle);
     }
 
-    public function display($show) {
-        print '<div id="yt_plContainer" class="yt_plContainer">';
-        $show['playlistTitle'] and
-                print '<div class="yt_title">&nbsp;' . $this->getTitle() . '<input type="button" value="Hide" onclick="showHide(\'description\',this)" /></div>';
-        $show['playlistDescription'] and print '<div id="description" class="yt_description">' . $this->newLineToBR($this->getDescription()) . '</div>';
-        print '<div id="player"><iframe class="yt_player" src="//www.youtube.com/embed/' . $this->videoList[0]->getID() . '?rel=0"  allowfullscreen></iframe></div>';
-        if ($show['videoDescription']) {
-            print '<div class="yt_title">&nbsp;Video Information<input type="button" value="Hide" onclick="showHide(\'videoInfo\',this)" /></div>';
-            print '<div id="videoInfo" class="yt_description">' . $this->newLineToBR($this->videoList[0]->getDescription()) . '</div>';
-        }
-        print '<div class="yt_title">&nbsp;Playlist';
-        $show['playlistVideoCount'] and print ' (' . $this->getNumOfVideos() . ')';
-        print '<input type="button" value="Hide" onclick="showHide(\'youtubePl\',this)" /><input type="button" value="Play All"'
-                . ' onclick="loadPlaylist(\'' . $this->getID() . '\')" /></div>';
-        print '<div class="yt_tblContainer"><table id="youtubePl" class="youtubePl"><tr class="plHeader">';
-        print '<th></th>';
-        $show['videoImage'] and print '<th></th>';
-        $show['videoTitle'] and print '<th>Title</th>';
-        $show['videoAuthor'] and print '<th>Author</th>';
-        $show['videoDatePublished'] and print '<th>Date Published</th>';
-        $show['videoViews'] and print '<th>Views</th>';
-        $show['videoFavoritesCount'] and print '<th>Favorites</th>';
-        $show['videoRaters'] and print '<th>Rated</th>';
-        $show['videoDuration'] and print '<th>Duration</th>';
-        print '</tr>';
-
-        foreach ($this->videoList as $i => $video) {
-            print '<tr class="plTracks" onclick="loadVideo(\'' . $video->getID() . "'" . ($show['videoDescription'] ? ",'" . htmlspecialchars($this->js($video->getDescription())) . "'" : "") . ')">';
-            print '<th>' . ($i + 1) . '</th>';
-            $show['videoImage'] and print '<td class="yt_img"><img alt="" class="yt_img" src=' . $video->getThumbnail() . ' /></td>';
-            $show['videoTitle'] and print '<td class="videoTitle">' . $video->getTitle() . '</td>';
-            $show['videoAuthor'] and print '<td>' . $video->getAuthor() . '</td>';
-            $show['videoDatePublished'] and print '<td>' . $video->getDatePublished() . '</td>';
-            $show['videoViews'] and print '<td>' . $video->getViews() . '</td>';
-            $show['videoFavoritesCount'] and print '<td>' . $video->getFavorites() . '</td>';
-            $show['videoRaters'] and print '<td>' . $video->getNumRaters() . '</td>';
-            $show['videoDuration'] and print '<td class="yt_duration">' . $video->getDuration() . '</td>';
-            print '</tr>';
-        }
-
-        print "</table></div>";
-        print "</div>";
-    }
-
 }
 
 class YouTubeVideo {
+    /* video id
+     * @var string */
 
     private $id;
     private $title;
@@ -304,6 +371,7 @@ class YouTubeVideo {
 
     /*   get functions        */
 
+    // @return Returns the Id of the Video 
     public function getId() {
         return $this->id;
     }
