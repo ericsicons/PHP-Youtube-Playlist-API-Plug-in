@@ -464,7 +464,7 @@ class YouTubeVideo {
 class PlaylistNotFound extends Exception {
 
     public function __construct($message) {
-        parent::__construct($message, 400, null);
+        parent::__construct($message);
     }
 
 }
