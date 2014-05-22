@@ -8,7 +8,7 @@
  * @example <br />
  * $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
  * @license   free
- * @version   1.3
+ * @version   2.0
  * @since     2014-Apr-23
  * @author    Eric Noguchi <eric@ericsicons.com>
  */
@@ -40,8 +40,8 @@ class YoutubePlayList {
             $this->videoList = unserialize($this->readFile(($videoFile)));
             $this->playList = unserialize($this->readFile(($playlistFile)));
         } else {
-            $xml = simplexml_load_string(file_get_contents('http://gdata.youtube.com/feeds/api/playlists/' . $playlistID
-                            . '?max-results=50&start-index=' . $startIndex));
+            $xml = simplexml_load_file('http://gdata.youtube.com/feeds/api/playlists/' . $playlistID
+                    . '?max-results=50&start-index=' . $startIndex);
             if (!$xml) {
                 throw new PlaylistNotFound(".: Error Opening Playlist " . $this->getID()
                 . ", Please check if the playlist ID is valid :.");
@@ -184,9 +184,13 @@ class YoutubePlayList {
      * @return string
      */
     public function getJSON() {
-        $JSONString = '{"id":"' . $this->getID() . '","title":"' . $this->js($this->getTitle()) .
-                '","description":"' . $this->js($this->getDescription()) . '","numVideos":"' . $this->getNumOfVideos()
-                . '","videos":{';
+        $JSONString = '{'
+                . '"id":"' . $this->getID() . '",'
+                . '"title":"' . $this->js($this->getTitle()) . '",'
+                . '"description":"' . $this->js($this->getDescription()) . '",'
+                . '"numVideos":"' . $this->getNumOfVideos() . '",'
+                . '"videos":'
+                . '{';
         foreach ($this->videoList as $k => $v) {
             $c = ($k === count($this->videoList) - 1) ? "" : ",";
 
@@ -210,13 +214,44 @@ class YoutubePlayList {
     }
 
     /**
+     * Returns all of the playlist data in XML format.
+     * @return string
+     */
+    public function getXML() {
+
+        $sc = function($str) {
+            return htmlspecialchars($str, ENT_QUOTES);
+        };
+        $playlist = new SimpleXMLElement("<playlist></playlist>");
+        $playlist->addChild("id", $sc($this->getID()));
+        $playlist->addChild("title", $sc($this->getTitle()));
+        $playlist->addChild("description", $sc($this->getDescription()));
+        $playlist->addChild("numVideos", $sc($this->getNumOfVideos()));
+        foreach ($this->videoList as $v) {
+            $videos = $playlist->addChild("video");
+            $videos->addChild('id', $sc($v->getID()));
+            $videos->addChild('title', $sc($v->getTitle()));
+            $videos->addChild('duration', $sc($v->getDuration()));
+            $videos->addChild('thumbnail', $sc($v->getThumbnail()));
+            $videos->addChild('datePublished', $sc($v->getDatePublished()));
+            $videos->addChild('description', $this->newLineToBR($sc($v->getDescription())));
+            $videos->addChild('views', $sc($v->getViews()));
+            $videos->addChild('favorites', $sc($v->getFavorites()));
+            $videos->addChild('numRated', $sc($v->getNumRaters()));
+            $videos->addChild('author', $sc($v->getAuthor()));
+        }
+
+        return $playlist->asXML();
+    }
+
+    /**
      * Returns the playlist RSS feed. <br />
      * Set numOfVideos to the number of the videos to show in the RSS feed, default: the latest 10 videos.<br />
      * Set playlistUrl to your website URL where the playlist is located, default: Youtube's URL for the playlist.<br />
      * @param array $config array("showNumVideos" => int numOfVideos, "playListURL" => string playlistUrl) <br />
      * @return string
      */
-    public function getRSS($config) {
+    public function getRSS(array $config) {
         $config['showNumVideos'] = isset($config['showNumVideos']) ? intval($config['showNumVideos']) : 10;
 
         $RSSString = '<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0"><channel><title><![CDATA[' .
@@ -245,7 +280,7 @@ class YoutubePlayList {
      * @see playlist_demo.php
      * @param array $show  Configuration array used to select which playlist data to show or hide. <br />
      */
-    public function display($show) {
+    public function display(array $show) {
         print '<div id="yt_plContainer" class="yt_plContainer">';
         $show['playlistTitle'] and
                 print '<div class="yt_title">&nbsp;' . $this->getTitle() .
@@ -304,10 +339,7 @@ class YoutubePlayList {
     }
 
     private function readFile($file) {
-        $f = fopen($file, "r") or die("Unable to open file!");
-        $contents = fread($f, filesize($file));
-        fclose($f);
-        return $contents;
+        return file_get_contents($file);
     }
 
     private function js($str) {
@@ -330,13 +362,11 @@ class YoutubePlayList {
  * to set and get the video data, this class is for internal use.
  *
  * @license   free
- * @version   1.3
+ * @version   2.0
  * @since     2014-Apr-23
  * @author    Eric Noguchi <eric@ericsicons.com>
  */
 class YouTubeVideo {
-    /* video id
-     * @var string */
 
     private $id;
     private $title;
@@ -453,7 +483,7 @@ class YouTubeVideo {
  * Class to handle the exception thrown when the supplied playlist ID is invalid
  *
  * @license   free
- * @version   1.3
+ * @version   2.0
  * @since     2014-Apr-23
  * @author    Eric Noguchi <eric@ericsicons.com>
  */
