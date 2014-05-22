@@ -19,6 +19,7 @@ Specifications and Features :
 	<li>[Play all] button which loads the full YouTube playlist.</li>
 	<li>Show and hide buttons to dynamically show/hide parts of the playlist.</li>
 	<li>Ability to extract and return playlist data in JSON format.</li>
+        <li>Ability to extract and return playlist data in XML format.</li>
 	<li>Ability to generate a RSS feed for the playlist.</li>
 	<li>Ability to select what to display from the following playlist data.</li>
 
