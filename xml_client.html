@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>REST Web Service Client Demo, Playlist XML data consumed with AJAX </title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript">
+            var playlist = "";
+
+            function loadXML() {
+                var xmlhttp;
+                if (window.XMLHttpRequest) {
+                    xmlhttp = new XMLHttpRequest();
+                } else {
+                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                xmlhttp.onreadystatechange = function() {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+
+                        playlist = xmlhttp.responseXML;
+                        var html = "";
+                        html += "<b>Playlist ID : </b>" + getNodeVal('id') + "<br />";
+                        html += "<b>Playlist Title : </b>" + getNodeVal('title') + "<br />";
+                        html += "<b>Playlist Description : </b>" + getNodeVal('description') + "<br />";
+                        html += "<b>Playlist Videos : </b>" + getNodeVal('numVideos') + "<br />";
+                        html += "<br /><strong>List of videos</strong> <br /><br />";
+                        html += "<table><tr><th>Index</th>";
+
+                        for (var x = 0; x < getEBTN('video')[0].childNodes.length; x++) {
+                            html += "<th>" + getEBTN('video')[0].childNodes[x].tagName + " </th>";
+                        }
+
+                        html += "</tr>";
+
+                        for (var x = 0; x < getEBTN('video').length; x++) {
+                            html += "<tr><td>" + x + "</td>";
+                            for (var y = 0; y < getEBTN('video')[x].childNodes.length; y++) {
+                                html += "<td>" + getEBTN('video')[x].childNodes[y].textContent + "</td>";
+                            }
+                            html += "</tr>";
+                        }
+                        html += "</table>";
+                        document.getElementById("myDiv").innerHTML = html;
+                    }
+                }
+                xmlhttp.open("GET", "xml/nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", true);
+                xmlhttp.send();
+            }
+
+            function getEBTN(tagName) {
+                return playlist.getElementsByTagName(tagName);
+            }
+
+            function getNodeVal(tagName) {
+                return getEBTN(tagName)[0].childNodes[0].textContent;
+            }
+
+            window.onload = loadXML;
+
+        </script>
+    </head>
+    <body>
+
+        <div id="myDiv"></div>
+    </body>
+</html>
