@@ -1,7 +1,12 @@
 
 RewriteEngine On
+
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-l
+RewriteRule ^json/(\w+)$ json_server.php?id=$1
 
-RewriteRule ^id/(\w+)$ json_server.php?id=$1
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-l
+RewriteRule ^xml/(\w+)$ xml_server.php?id=$1
