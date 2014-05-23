@@ -219,26 +219,24 @@ class YoutubePlayList {
      */
     public function getXML() {
 
-        $sc = function($str) {
-            return htmlspecialchars($str, ENT_QUOTES);
-        };
+
         $playlist = new SimpleXMLElement("<playlist></playlist>");
-        $playlist->addChild("id", $sc($this->getID()));
-        $playlist->addChild("title", $sc($this->getTitle()));
-        $playlist->addChild("description", $sc($this->getDescription()));
-        $playlist->addChild("numVideos", $sc($this->getNumOfVideos()));
+        $playlist->addChild("id", htmlspecialchars($this->getID(), ENT_QUOTES));
+        $playlist->addChild("title", htmlspecialchars($this->getTitle(), ENT_QUOTES));
+        $playlist->addChild("description", htmlspecialchars($this->getDescription(), ENT_QUOTES));
+        $playlist->addChild("numVideos", htmlspecialchars($this->getNumOfVideos(), ENT_QUOTES));
         foreach ($this->videoList as $v) {
             $videos = $playlist->addChild("video");
-            $videos->addChild('id', $sc($v->getID()));
-            $videos->addChild('title', $sc($v->getTitle()));
-            $videos->addChild('duration', $sc($v->getDuration()));
-            $videos->addChild('thumbnail', $sc($v->getThumbnail()));
-            $videos->addChild('datePublished', $sc($v->getDatePublished()));
-            $videos->addChild('description', $this->newLineToBR($sc($v->getDescription())));
-            $videos->addChild('views', $sc($v->getViews()));
-            $videos->addChild('favorites', $sc($v->getFavorites()));
-            $videos->addChild('numRated', $sc($v->getNumRaters()));
-            $videos->addChild('author', $sc($v->getAuthor()));
+            $videos->addChild('id', htmlspecialchars($v->getID(), ENT_QUOTES));
+            $videos->addChild('title', htmlspecialchars($v->getTitle(), ENT_QUOTES));
+            $videos->addChild('duration', htmlspecialchars($v->getDuration(), ENT_QUOTES));
+            $videos->addChild('thumbnail', htmlspecialchars($v->getThumbnail(), ENT_QUOTES));
+            $videos->addChild('datePublished', htmlspecialchars($v->getDatePublished(), ENT_QUOTES));
+            $videos->addChild('description', $this->newLineToBR(htmlspecialchars($v->getDescription(), ENT_QUOTES)));
+            $videos->addChild('views', htmlspecialchars($v->getViews(), ENT_QUOTES));
+            $videos->addChild('favorites', htmlspecialchars($v->getFavorites(), ENT_QUOTES));
+            $videos->addChild('numRated', htmlspecialchars($v->getNumRaters(), ENT_QUOTES));
+            $videos->addChild('author', htmlspecialchars($v->getAuthor(), ENT_QUOTES));
         }
 
         return $playlist->asXML();
