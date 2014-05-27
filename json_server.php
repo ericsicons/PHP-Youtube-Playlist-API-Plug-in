@@ -5,16 +5,17 @@ error_reporting(0);
 require 'ytpl_php.php';
 header('Content-Type: application/json');
 
-try {
-    if (isset($_GET['id'])) {
-        $playlist = new YoutubePlayList($playlistID = $_GET['id'], $cacheAge = 1);
+if (isset($_GET['id'])) {
+    $id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_SPECIAL_CHARS);
+    try {
+        $playlist = new YoutubePlayList($playlistID = $id, $cacheAge = 1);
         echo $playlist->getJSON();
+    } catch (PlaylistNotFound $e) {
+        header('HTTP/1.1 404 Playlist Not Found');
+        echo json_encode(array(
+            "statusCode" => 404,
+            "status" => "Playlist $id Not Found"
+        ));
     }
-} catch (PlaylistNotFound $e) {
-    header('HTTP/1.1 400 Playlist Not Found');
-    echo json_encode(array(
-        "status" => 400,
-        "status_message" => "Playlist Not Found"
-    ));
 }
 ?>
