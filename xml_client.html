@@ -8,12 +8,7 @@
             var playlist = "";
 
             function loadXML() {
-                var xmlhttp;
-                if (window.XMLHttpRequest) {
-                    xmlhttp = new XMLHttpRequest();
-                } else {
-                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-                }
+                var xmlhttp = window.XMLHttpRequest ? new XMLHttpRequest : new ActiveXObject("Microsoft.XMLHTTP");
                 xmlhttp.onreadystatechange = function() {
                     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 
@@ -42,8 +37,14 @@
                         html += "</table>";
                         document.getElementById("myDiv").innerHTML = html;
                     }
+                    if (xmlhttp.readyState == 4 && xmlhttp.status !== 200) {
+                        playlist = xmlhttp.responseXML;
+                        var html = "<strong>Status Message</strong> : " + getNodeVal('status') +
+                                "<br /><strong>Status Code :</strong> " + getNodeVal('statusCode');
+                        document.getElementById("myDiv").innerHTML = html;
+                    }
                 }
-                xmlhttp.open("GET", "xml/nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", true);
+                xmlhttp.open("GET", "xml/6B08BAA57B5C7810", true);
                 xmlhttp.send();
             }
 
@@ -52,7 +53,7 @@
             }
 
             function getNodeVal(tagName) {
-                return getEBTN(tagName)[0].childNodes[0].textContent;
+                return getEBTN(tagName)[0].firstChild.textContent;
             }
 
             window.onload = loadXML;
