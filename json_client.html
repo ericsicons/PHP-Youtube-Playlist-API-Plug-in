@@ -8,15 +8,10 @@
 
 
             function loadJSON() {
-                var xmlhttp;
-                if (window.XMLHttpRequest) {
-                    xmlhttp = new XMLHttpRequest();
-                } else {
-                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-                }
+                var xmlhttp = window.XMLHttpRequest ? new XMLHttpRequest : new ActiveXObject("Microsoft.XMLHTTP");
                 xmlhttp.onreadystatechange = function() {
                     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                        
+
                         var playlist = JSON.parse(xmlhttp.responseText);
                         var html = "";
                         html += "<b>Playlist ID : </b>" + playlist.id + "<br />";
@@ -42,8 +37,14 @@
                         html += "</table>";
                         document.getElementById("myDiv").innerHTML = html;
                     }
+                    if (xmlhttp.readyState == 4 && xmlhttp.status !== 200) {
+                        var playlist = JSON.parse(xmlhttp.responseText);
+                        var html = "<strong>Status Message</strong> : " + playlist.status +
+                                "<br /><strong>Status Code :</strong> " + playlist.statusCode;
+                        document.getElementById("myDiv").innerHTML = html;
+                    }
                 }
-                xmlhttp.open("GET", "json/nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", true);
+                xmlhttp.open("GET", "json/6B08BAA57B5C781", true);
                 xmlhttp.send();
             }
             window.onload = loadJSON;
