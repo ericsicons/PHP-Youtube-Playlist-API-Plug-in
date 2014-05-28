@@ -8,7 +8,7 @@
  * @example <br />
  * $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
  * @license   free
- * @version   2.0
+ * @version   3.0
  * @since     2014-Apr-23
  * @author    Eric Noguchi <eric@ericsicons.com>
  */
@@ -28,7 +28,7 @@ class YoutubePlayList {
      *  
      * @throws PlaylistNotFound
      */
-    public function __construct($playlistID, $cacheAge = 168, $startIndex = 1, $notRecursiveCall = true) {
+    public function YoutubePlayList($playlistID, $cacheAge = 168, $startIndex = 1, $notRecursiveCall = true) {
         $this->playList['id'] = "PL" . $playlistID;
 
         $fileDir = "ytpl_cache/";
@@ -43,7 +43,7 @@ class YoutubePlayList {
             $xml = simplexml_load_file('http://gdata.youtube.com/feeds/api/playlists/' . $playlistID
                     . '?max-results=50&start-index=' . $startIndex);
             if (!$xml) {
-                throw new PlaylistNotFound(".: Error Opening Playlist " . $this->getID()
+                throw new PlaylistNotFound(".: Error! Opening Playlist " . $this->getID()
                 . ", Please check if the playlist ID is valid :.");
             }
 
@@ -177,14 +177,164 @@ class YoutubePlayList {
     }
 
     /**
+     * Deletes all the playlist data from the database
+     * @param string $db_host Database hostname, default is localhost
+     * @param string $uname Username to access the database, default is root
+     * @param string $password Password to access the database, default is ''
+     * @param string $db_name Name of the database to delete the current playlist data from, default is youtube_playlist
+     * @throws DatabaseException
+     * @see mysql_operations_demo.php
+     */
+    public function deleteFromMySQL($db_host = 'localhost', $uname = 'root', $password = ''
+    , $db_name = 'youtube_playlist') {
+        $db = new PDODatabaseConnection($db_host, $uname, $password);
+        // if the playlist is already in mysql delete all related data before reinserting new data
+        $t = $db->query('SELECT * FROM `' . $db_name . '`.`playlist` WHERE `id` = :id;', null, array(
+            ':id' => $this->getID()));
+        if ($t->rowCount() > 0) {
+
+            // running the below query to delete the playlist data from the
+            // videos table since ON DELETE CASCADE will not work for databases not supporting ENGINE = InnoDB
+            $db->query('DELETE FROM `' . $db_name . '`.`videos` WHERE `playlist_id` = :id;', null, array(
+                ':id' => $this->getID()));
+            $db->query('DELETE FROM `' . $db_name . '`.`playlist` WHERE `id` = :id;', null, array(
+                ':id' => $this->getID()));
+        }
+        $db->close();
+    }
+
+    /**
+     * Creates the playlist database and tables and saves the playlist data
+     * @param string $db_host Database hostname, default is localhost
+     * @param string $uname Username to access the database, default is root
+     * @param string $password Password to access the database, default is ''
+     * @param string $db_name Name of the database to create and save the playlist data into, default is youtube_playlist
+     * @param boolean $enableSchemaCreateStatement If you don't have schema creation privileges set this to false and create
+     * the database manually
+     * @throws DatabaseException
+     * @see mysql_operations_demo.php
+     * 
+     */
+    public function saveToMySQL($db_host = 'localhost', $uname = 'root', $password = '', $db_name = 'youtube_playlist'
+    , $enableSchemaCreateStatement = true) {
+
+        $db = new PDODatabaseConnection($db_host, $uname, $password);
+        if ($enableSchemaCreateStatement) {
+            $db->query('CREATE SCHEMA IF NOT EXISTS `' . $db_name . '` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;');
+        }
+        $t = $db->query("SHOW DATABASES LIKE '$db_name'");
+        if ($t->rowCount() == 0) {
+            throw new DatabaseException(".: Error! Database $db_name does not exists :.");
+        }
+        $db->query('CREATE TABLE IF NOT EXISTS `' . $db_name . '`.`playlist` (
+                    `id` VARCHAR(45) NOT NULL,
+                    `title` TEXT NULL,
+                    `description` TEXT NULL,
+                    `numVideos` VARCHAR(3) NULL,
+                    PRIMARY KEY (`id`))
+                    ENGINE = InnoDB;'
+        );
+        $db->query('CREATE TABLE IF NOT EXISTS `' . $db_name . '`.`videos` (
+                    `id` VARCHAR(20) NOT NULL,
+                    `playlist_id` VARCHAR(45),
+                    `title` TEXT NULL,
+                    `description` TEXT NULL,
+                    `duration` VARCHAR(6) NULL,
+                    `thumbnail` VARCHAR(60) NULL,
+                    `datePublished` DATE NULL,
+                    `views` INT NULL,
+                    `favorites` INT NULL,
+                    `numRated` INT NULL,
+                    `author` VARCHAR(30) NULL,
+                    PRIMARY KEY (`id`),
+                    INDEX `playlist_id_fk_idx` (`playlist_id` ASC),
+                    CONSTRAINT `playlist_id_fk`
+                      FOREIGN KEY (`playlist_id`)
+                      REFERENCES `' . $db_name . '`.`playlist` (`id`)
+                      ON DELETE CASCADE
+                      ON UPDATE CASCADE)
+                  ENGINE = InnoDB;'
+        );
+
+        // deleting old playlist data before inserting new data
+        $this->deleteFromMySQL($db_host, $uname, $password, $db_name);
+
+        $db->query('LOCK TABLES `' . $db_name . '`.`playlist` WRITE;');
+        $db->query('INSERT INTO `' . $db_name . '`.`playlist` (
+                    `id`,
+                    `title`,
+                    `description`,
+                    `numVideos`)
+                    VALUES
+                    (:id,
+                    :title,
+                    :description,
+                    :numVideos);
+                    ', null, array(
+            ':id' => $this->getID(),
+            ':title' => $this->getTitle(),
+            ':description' => $this->getDescription(),
+            ':numVideos' => $this->getNumOfVideos()
+        ));
+        $db->query('UNLOCK TABLES;');
+
+
+        $db->query('LOCK TABLES `' . $db_name . '`.`videos` WRITE;');
+        foreach ($this->videoList as $v) {
+            $db->query('INSERT INTO `' . $db_name . '`.`videos`
+                        (`id`,
+                        `playlist_id`,
+                        `title`,
+                        `description`,
+                        `duration`,
+                        `thumbnail`,
+                        `datePublished`,
+                        `views`,
+                        `favorites`,
+                        `numRated`,
+                        `author`)
+                        VALUES
+                        (:id,
+                        :playlist_id,
+                        :title,
+                        :description,
+                        :duration,
+                        :thumbnail,
+                        :datePublished,
+                        :views,
+                        :favorites,
+                        :numRated,
+                        :author);
+                        ', null, array(
+                ':id' => $v->getID(),
+                ':playlist_id' => $this->getID(),
+                ':title' => $v->getTitle(),
+                ':description' => $v->getDescription(),
+                ':duration' => $v->getDuration(),
+                ':thumbnail' => $v->getThumbnail(),
+                ':datePublished' => $v->getDatePublished(),
+                ':views' => $v->getViews(),
+                ':favorites' => $v->getFavorites(),
+                ':numRated' => $v->getNumRaters(),
+                ':author' => $v->getAuthor()));
+        }
+        $db->query('UNLOCK TABLES;');
+        $db->close();
+    }
+
+    /**
      * Returns all of the playlist data in JSON format. <br />
-     * Key structure : {id, title, description ,numVideos, videos:{ 
+     * Key structure : {statusCode, status, id, title, description ,numVideos, videos:{ 
      * <br />videoIndex:{id, title, duration, thumbnail, datePublished, description, views, favorites, numRated, author
      * } } }
      * @return string
+     * @see json_server.php
      */
     public function getJSON() {
         $JSONString = '{'
+                . '"statusCode":"200",'
+                . '"status":"OK",'
+                . '"id":"' . $this->getID() . '",'
                 . '"id":"' . $this->getID() . '",'
                 . '"title":"' . $this->js($this->getTitle()) . '",'
                 . '"description":"' . $this->js($this->getDescription()) . '",'
@@ -216,11 +366,14 @@ class YoutubePlayList {
     /**
      * Returns all of the playlist data in XML format.
      * @return string
+     * @see xml_server.php
      */
     public function getXML() {
 
 
         $playlist = new SimpleXMLElement("<playlist></playlist>");
+        $playlist->addChild("statusCode", "200");
+        $playlist->addChild("status", "OK");
         $playlist->addChild("id", htmlspecialchars($this->getID(), ENT_QUOTES));
         $playlist->addChild("title", htmlspecialchars($this->getTitle(), ENT_QUOTES));
         $playlist->addChild("description", htmlspecialchars($this->getDescription(), ENT_QUOTES));
@@ -248,6 +401,7 @@ class YoutubePlayList {
      * Set playlistUrl to your website URL where the playlist is located, default: Youtube's URL for the playlist.<br />
      * @param array $config array("showNumVideos" => int numOfVideos, "playListURL" => string playlistUrl) <br />
      * @return string
+     * @see rss_demo.php
      */
     public function getRSS(array $config) {
         $config['showNumVideos'] = isset($config['showNumVideos']) ? intval($config['showNumVideos']) : 10;
@@ -273,8 +427,8 @@ class YoutubePlayList {
     }
 
     /**
-     * Builds and displays the playlist. <br />
-     * Call this method in the location you want the playlist to appear on your site.<br />
+     * Builds and displays the playlist in HTML. <br />
+     * Call this method in the location where you want the playlist to appear on your site.<br />
      * @see playlist_demo.php
      * @param array $show  Configuration array used to select which playlist data to show or hide. <br />
      */
@@ -360,7 +514,7 @@ class YoutubePlayList {
  * to set and get the video data, this class is for internal use.
  *
  * @license   free
- * @version   2.0
+ * @version   3.0
  * @since     2014-Apr-23
  * @author    Eric Noguchi <eric@ericsicons.com>
  */
@@ -481,14 +635,93 @@ class YouTubeVideo {
  * Class to handle the exception thrown when the supplied playlist ID is invalid
  *
  * @license   free
- * @version   2.0
+ * @version   3.0
  * @since     2014-Apr-23
  * @author    Eric Noguchi <eric@ericsicons.com>
  */
 class PlaylistNotFound extends Exception {
 
-    public function __construct($message) {
+    public function PlaylistNotFound($message) {
         parent::__construct($message);
+    }
+
+}
+
+/**
+ * Class to handle the possible exceptions thrown when working with MySQL databse.
+ *
+ * @license   free
+ * @version   3.0
+ * @since     2014-May-27
+ * @author    Eric Noguchi <eric@ericsicons.com>
+ */
+class DatabaseException extends Exception {
+
+    public function DatabaseException($message) {
+        parent::__construct($message);
+    }
+
+}
+
+/**
+ * PDO Wrapper Class used for creating connections and querying the database.
+ *
+ * @license   free
+ * @version   3.0
+ * @since     2014-Apr-23
+ * @author    Eric Noguchi <eric@ericsicons.com>
+ */
+class PDODatabaseConnection {
+
+    private $con = "";
+
+    /** Creates a PDO database connection
+     * @param string $db_host Database hostname
+     * @param string $uname Username to access the database
+     * @param string $password Password to access the database
+     * @throws DatabaseException
+     */
+    public function PDODatabaseConnection($db_host, $uname, $password) {
+        try {
+            $this->con = new PDO('mysql:host=' . $db_host . ';', $uname, $password);
+        } catch (PDOException $e) {
+            throw new DatabaseException(".: Error! " . $e->getMessage() . " :.");
+        }
+    }
+
+    /**
+     * Executes MySQL queries
+     * @param string $sql MySQL statement to be executed
+     * @param string $columnName If set, the query method will return the data of first row for the specified column 
+     * name. <br /> Should be used on a queries which will result in a single row count.
+     * @param Array $bind Array used for PDO Param binding on the MySQL statment .
+     * @throws DatabaseException
+     * @return PDOStatement|String Returns a PDO prepared statement object if $columnName is not set otherwise it 
+     * will return a string.
+     * 
+     */
+    public function query($sql, $columnName = null, $binds = null) {
+        $result = null;
+        $dbh = $this->con;
+        $stmt = $dbh->prepare($sql);
+        if (!$stmt->execute($binds)) {
+            throw new DatabaseException(".: Error! unable to execute query [ <strong>$sql</strong> ]<br/>:.");
+        }
+        if ($columnName != null) {
+            if ($row = $stmt->fetch()) {
+                $result = $row[$columnName];
+            }
+            return $result;
+        } else {
+            return $stmt;
+        }
+    }
+
+    /**
+     * Closes the PDO connection
+     */
+    function close() {
+        $this->con = null;
     }
 
 }
