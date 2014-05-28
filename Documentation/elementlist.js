@@ -1,3 +1,3 @@
 
 var ApiGen = ApiGen || {};
-ApiGen.elements = [["c","PlaylistNotFound"],["c","YoutubePlayList"],["c","YouTubeVideo"]];
+ApiGen.elements = [["c","DatabaseException"],["c","PDODatabaseConnection"],["c","PlaylistNotFound"],["c","YoutubePlayList"],["c","YouTubeVideo"]];

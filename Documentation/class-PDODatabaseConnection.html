@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="generator" content="ApiGen 2.8.0" />
+
+	<title>Class PDODatabaseConnection | Youtube Playlist API</title>
+
+	<script type="text/javascript" src="resources/combined.js?3707929759"></script>
+	<script type="text/javascript" src="elementlist.js?3204882264"></script>
+	<link rel="stylesheet" type="text/css" media="all" href="resources/style.css?3505392360" />
+
+</head>
+
+<body>
+<div id="left">
+	<div id="menu">
+		<a href="index.html" title="Overview"><span>Overview</span></a>
+
+
+		<div id="groups">
+		</div>
+
+
+
+		<div id="elements">
+			<h3>Classes</h3>
+			<ul>
+				<li class="active"><a href="class-PDODatabaseConnection.html">PDODatabaseConnection</a></li>
+				<li><a href="class-YoutubePlayList.html">YoutubePlayList</a></li>
+				<li><a href="class-YouTubeVideo.html">YouTubeVideo</a></li>
+			</ul>
+
+
+
+			<h3>Exceptions</h3>
+			<ul>
+				<li><a href="class-DatabaseException.html">DatabaseException</a></li>
+				<li><a href="class-PlaylistNotFound.html">PlaylistNotFound</a></li>
+			</ul>
+
+
+		</div>
+	</div>
+</div>
+
+<div id="splitter"></div>
+
+<div id="right">
+<div id="rightInner">
+	<form id="search">
+		<input type="hidden" name="cx" value="" />
+		<input type="hidden" name="ie" value="UTF-8" />
+		<input type="text" name="q" class="text" />
+		<input type="submit" value="Search" />
+	</form>
+
+	<div id="navigation">
+		<ul>
+			<li>
+				<a href="index.html" title="Overview"><span>Overview</span></a>
+			</li>
+			<li class="active">
+<span>Class</span>			</li>
+		</ul>
+		<ul>
+			<li>
+				<a href="tree.html" title="Tree view of classes, interfaces, traits and exceptions"><span>Tree</span></a>
+			</li>
+			<li>
+				<a href="todo.html" title="Todo list"><span>Todo</span></a>
+			</li>
+		</ul>
+		<ul>
+		</ul>
+	</div>
+
+<div id="content" class="class">
+	<h1>Class PDODatabaseConnection</h1>
+
+
+	<div class="description">
+	
+<p>PDO Wrapper Class used for creating connections and querying the
+database.</p>
+
+	</div>
+
+
+
+
+
+
+
+
+
+	<div class="info">
+		
+		
+		
+		
+
+				<b>License:</b>
+				<a href="free">free</a><br />
+				<b>Author:</b>
+				Eric Noguchi &lt;<a
+href="mailto:eric&#64;ericsicons.com">eric&#64;<!---->ericsicons.com</a>&gt;<br />
+				<b>Version:</b>
+				3.0<br />
+				<b>Since:</b>
+				2014-Apr-23<br />
+		<b>Located at</b> <a href="source-class-PDODatabaseConnection.html#666-727" title="Go to source code">ytpl_php.php</a><br />
+	</div>
+
+
+
+	<table class="summary" id="methods">
+	<caption>Methods summary</caption>
+	<tr data-order="PDODatabaseConnection" id="_PDODatabaseConnection">
+
+		<td class="attributes"><code>
+			 public 
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_PDODatabaseConnection">#</a>
+		<code><a href="source-class-PDODatabaseConnection.html#678-690" title="Go to source code">PDODatabaseConnection</a>( <span>string <var>$db_host</var></span>, <span>string <var>$uname</var></span>, <span>string <var>$password</var></span> )</code>
+
+		<div class="description short">
+			
+<p>Creates a PDO database connection</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Creates a PDO database connection</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$db_host</var></dt>
+					<dd><code>string</code><br>$db_host Database hostname</dd>
+					<dt><var>$uname</var></dt>
+					<dd><code>string</code><br>$uname Username to access the database</dd>
+					<dt><var>$password</var></dt>
+					<dd><code>string</code><br>$password Password to access the database</dd>
+				</dl></div>
+
+
+				<h4>Throws</h4>
+				<div class="list">
+					<code><code><a href="class-DatabaseException.html">DatabaseException</a></code></code><br />
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="query" id="_query">
+
+		<td class="attributes"><code>
+			 public 
+			PDOStatement|String
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_query">#</a>
+		<code><a href="source-class-PDODatabaseConnection.html#692-718" title="Go to source code">query</a>( <span>string <var>$sql</var></span>, <span>string <var>$columnName</var> = <span class="php-keyword1">null</span></span>, <span>Array <var>$binds</var> = <span class="php-keyword1">null</span></span> )</code>
+
+		<div class="description short">
+			
+<p>Executes MySQL queries</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Executes MySQL queries</p>
+
+
+
+				<h4>Parameters</h4>
+				<div class="list"><dl>
+					<dt><var>$sql</var></dt>
+					<dd><code>string</code><br>$sql MySQL statement to be executed</dd>
+					<dt><var>$columnName</var></dt>
+					<dd><code>string</code><br>$columnName If set, the query method will return the data of first row for the
+specified column name.<br />
+Should be used on a queries which will result in a single row count.</dd>
+					<dt><var>$binds</var></dt>
+					<dd><code>Array</code><br>$bind Array used for PDO Param binding on the MySQL statment .</dd>
+				</dl></div>
+
+				<h4>Returns</h4>
+				<div class="list">
+					<code>PDOStatement|String</code><br>Returns a PDO prepared statement object if $columnName is not set otherwise it
+will return a string.<br />
+				</div>
+
+				<h4>Throws</h4>
+				<div class="list">
+					<code><code><a href="class-DatabaseException.html">DatabaseException</a></code></code><br />
+				</div>
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	<tr data-order="close" id="_close">
+
+		<td class="attributes"><code>
+			 public 
+			
+			
+			</code>
+		</td>
+
+		<td class="name"><div>
+		<a class="anchor" href="#_close">#</a>
+		<code><a href="source-class-PDODatabaseConnection.html#720-725" title="Go to source code">close</a>( )</code>
+
+		<div class="description short">
+			
+<p>Closes the PDO connection</p>
+
+		</div>
+
+		<div class="description detailed hidden">
+			
+<p>Closes the PDO connection</p>
+
+
+
+
+
+
+
+
+		</div>
+		</div></td>
+	</tr>
+	</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+	<div id="footer">
+		Youtube Playlist API API documentation generated by <a href="http://apigen.org">ApiGen 2.8.0</a>
+	</div>
+</div>
+</div>
+</body>
+</html>
