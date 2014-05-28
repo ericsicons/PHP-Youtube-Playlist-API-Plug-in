@@ -14,7 +14,7 @@ try {
 
     $playlistTwo = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
     $playlistTwo->saveToMySQL($db_host = 'localhost', $uname = 'root', $password = '', $db_name = 'youtube_playlist'
-            , $enableSchemaCreateStatement = false);
+            , $enableSchemaCreateStatement = true);
 
 //    Uncomment for a demo on how to delete the playlist data
 //    $playlistTwo->deleteFromMySQL($db_host = 'localhost', $uname = 'root', $password = ''
