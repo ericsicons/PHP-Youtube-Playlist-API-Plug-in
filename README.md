@@ -18,6 +18,7 @@ Specifications and Features :
 	<li>Ability to set how often in hours to cache the playlist data.</li>
 	<li>[Play all] button which loads the full YouTube playlist.</li>
 	<li>Show and hide buttons to dynamically show/hide parts of the playlist.</li>
+        <li>Ability to save the playlist data in MySQL database.</li>
 	<li>Ability to extract and return playlist data in JSON format.</li>
         <li>Ability to extract and return playlist data in XML format.</li>
 	<li>Ability to generate a RSS feed for the playlist.</li>
