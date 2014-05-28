@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <meta name=viewport content="width=device-width, initial-scale=1">
         <title>PHP Yotube Playlist API Plugin Demo</title>
         <!-- please include the below ytpl_js.js and ytpl_style.css in every page 
         that will contain a playlist. To change the appearance of the playlist 
