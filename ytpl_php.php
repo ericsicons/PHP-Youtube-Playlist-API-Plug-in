@@ -6,7 +6,8 @@
  *
  * The constructor of the YoutubePlayList class takes a yotube Playlist ID and the Cache Age.
  * @example <br />
- * $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);
+ * $playlist = new YoutubePlayList($playlistID = "nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u", $cacheAge = 1);<br />
+ * $playlist->display(array $config)
  * @license   free
  * @version   3.0
  * @since     2014-Apr-23
@@ -335,7 +336,6 @@ class YoutubePlayList {
                 . '"statusCode":"200",'
                 . '"status":"OK",'
                 . '"id":"' . $this->getID() . '",'
-                . '"id":"' . $this->getID() . '",'
                 . '"title":"' . $this->js($this->getTitle()) . '",'
                 . '"description":"' . $this->js($this->getDescription()) . '",'
                 . '"numVideos":"' . $this->getNumOfVideos() . '",'
@@ -436,21 +436,21 @@ class YoutubePlayList {
         print '<div id="yt_plContainer" class="yt_plContainer">';
         $show['playlistTitle'] and
                 print '<div class="yt_title">&nbsp;' . $this->getTitle() .
-                        '<input type="button" value="Hide" onclick="showHide(\'description\',this)" /></div>';
+                        '<input class="yt_button" type="button" value="Hide" onclick="showHide(\'description\',this)" /></div>';
         $show['playlistDescription'] and print '<div id="description" class="yt_description">' .
                         $this->newLineToBR($this->getDescription()) . '</div>';
         print '<div id="player"><iframe class="yt_player" src="//www.youtube.com/embed/' . $this->videoList[0]->getID()
                 . '?rel=0"  allowfullscreen></iframe></div>';
         if ($show['videoDescription']) {
             print '<div class="yt_title">&nbsp;Video Information'
-                    . '<input type="button" value="Hide" onclick="showHide(\'videoInfo\',this)" /></div>';
+                    . '<input class="yt_button" type="button" value="Hide" onclick="showHide(\'videoInfo\',this)" /></div>';
             print '<div id="videoInfo" class="yt_description">' .
                     $this->newLineToBR($this->videoList[0]->getDescription()) . '</div>';
         }
         print '<div class="yt_title">&nbsp;Playlist';
         $show['playlistVideoCount'] and print ' (' . $this->getNumOfVideos() . ')';
-        print '<input type="button" value="Hide" onclick="showHide(\'youtubePl\',this)" />'
-                . '<input type="button" value="Play All"'
+        print '<input class="yt_button" type="button" value="Hide" onclick="showHide(\'youtubePl\',this)" />'
+                . '<input class="yt_button" type="button" value="Play All"'
                 . ' onclick="loadPlaylist(\'' . $this->getID() . '\')" /></div>';
         print '<div class="yt_tblContainer"><table id="youtubePl" class="youtubePl"><tr class="plHeader">';
         print '<th></th>';
