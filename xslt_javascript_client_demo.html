@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>XSLT JavaScript client Demo</title>
+        <script type="text/javascript">
+            var xhttp;
+            function loadXMLDoc(filename)
+            {
+                xhttp = window.XMLHttpRequest ? new XMLHttpRequest : new ActiveXObject("Microsoft.XMLHTTP");
+                xhttp.open("GET", filename, false);
+                try {
+                    xhttp.responseType = "msxml-document"
+                } catch (err) {
+                } // Helping IE11
+                xhttp.send("");
+                return xhttp.responseXML;
+            }
+
+            function displayResult()
+            {
+                xml = loadXMLDoc("xml/nqdTIS_B64I7zbB_tPgvHiFTnmIqpT0u");
+                xsl = loadXMLDoc("xsl_stylesheet.xsl");
+                // code for IE
+                if (window.ActiveXObject || xhttp.responseType == "msxml-document")
+                {
+                    ex = xml.transformNode(xsl);
+                    document.getElementById("example").innerHTML = ex;
+                }
+                // code for Chrome, Firefox, Opera, etc.
+                else if (document.implementation && document.implementation.createDocument)
+                {
+                    xsltProcessor = new XSLTProcessor();
+                    xsltProcessor.importStylesheet(xsl);
+                    resultDocument = xsltProcessor.transformToFragment(xml, document);
+                    document.getElementById("example").appendChild(resultDocument);
+                }
+            }
+        </script>
+    </head>
+    <body onload="displayResult()">
+        <div id="example"></div>
+    </body>
+</html>
