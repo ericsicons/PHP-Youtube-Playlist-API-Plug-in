@@ -4,9 +4,10 @@
 error_reporting(0);
 require 'ytpl_php.php';
 header('Content-type: text/xml');
+$id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_SPECIAL_CHARS);
 
-if (isset($_GET['id'])) {
-    $id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_SPECIAL_CHARS);
+if (isset($id)) {
+
     try {
         $playlist = new YoutubePlayList($playlistID = $id, $cacheAge = 1);
         echo $playlist->getXML();
@@ -16,4 +17,3 @@ if (isset($_GET['id'])) {
         . '<statusCode>404</statusCode></playlist>';
     }
 }
-?>
